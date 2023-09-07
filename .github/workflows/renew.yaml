@@ -1,4 +1,4 @@
-name: 自动续期 section.io 项目
+name: section
 on:
   schedule:
     - cron: '0 0 1 * *'
@@ -13,9 +13,10 @@ jobs:
         id: get-info
         run: |
           echo "::set-output name=project_id::$(curl -s -X GET https://api.section.io/v2/projects | jq -r '.[] | select(.name == env.PROJECT_NAME) | .id')"
-          echo "::set-output name=project_token::$(curl -s -X GET https://api.section.io/v2/projects | jq -r '.[] | select(.name == env.PROJECT_TOKEN) | .token')"
+          echo "::set-output name=project_token::$(curl -s -X GET https://api.section.io/v2/projects | jq -r '.[] | select(.name == env.PROJECT_NAME) | .token')"
       - name: 续期项目
-        uses: sectionio/actions/renew@v1
+        uses: sectionio/actions/renew@main
         with:
           project_id: ${{ steps.get-info.outputs.project_id }}
           project_token: ${{ steps.get-info.outputs.project_token }}
+
