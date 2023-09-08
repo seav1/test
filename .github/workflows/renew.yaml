@@ -1,40 +1,30 @@
-name: Postpone Hibernation on Section.io
+name: Renew section.io
 
 on:
-  schedule:
-    - cron: 0 0 * * *
   workflow_dispatch:
-  
+  schedule:
+    - cron: "0 0 * * *"
+
 jobs:
-  postpone-hibernation:
+  renew:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Section.io Repository
+      - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          repository: section-io/section.io
-          branch: main
+          python-version: 3.x
 
-      - name: Install Required Dependencies
+      - name: Install dependencies
         run: |
-          npm install node-fetch
+          python -m pip install --upgrade pip
+          pip install requests
 
-      - name: Postpone Hibernation
+      - name: Run renewal script
         env:
-          SECTION_IO_TOKEN: ${{ secrets.SECTION_IO_TOKEN }}
+          SECTION_IO_API_KEY: ${{ secrets.SECTION_IO_API_KEY }}
         run: |
-          node -e "require('child_process').execSync('curl -X POST \
-            https://api.section.io/v2/projects/${{ github.event.repository.name }}/actions/hibernation/postpone \
-            -H 'Authorization: Bearer $SECTION_IO_TOKEN' \
-            -H 'Content-Type: application/json' \
-            -d '{\"duration\": 86400}'')"
-
-      - name: Support Manual Start
-        env:
-          SECTION_IO_TOKEN: ${{ secrets.SECTION_IO_TOKEN }}
-        run: |
-          node -e "require('child_process').execSync('curl -X POST \
-            https://api.section.io/v2/projects/${{ github.event.repository.name }}/actions/hibernation/start \
-            -H 'Authorization: Bearer $SECTION_IO_TOKEN' \
-            -H 'Content-Type: application/json' \
-            -d '{}')"
+          python renew.py
