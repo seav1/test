@@ -1,21 +1,17 @@
-import os
 import requests
 
-API_ENDPOINT = "url = "https://aperture.section.io/api/v1/accounts/me/sites/all/hibernation"
 
-# 指定需要进行续期操作的节点 ID 和天数
-NODE_ID = 43009
-DAYS_TO_POSTPONE = 7
-
-def renew_hibernation(api_key, node_id, days):
-    headers = {"Authorization": f"Bearer {api_key}"}
-    data = {"days": days, "node_id": node_id}
-    response = requests.post(API_ENDPOINT, headers=headers, json=data)
-    if response.ok:
-        print(f"Hibernation postponed for {days} days on node ID {node_id}")
+def postpone_hibernation(api_token):
+    url = "https://aperture.section.io/api/v1/accounts/me/sites/all/hibernation"
+    headers = {"Authorization": "Bearer {}".format(api_token)}
+    response = requests.post(url, headers=headers)
+    if response.status_code == 200:
+        return True
     else:
-        print(f"Failed to postpone hibernation on node ID {node_id}")
+        return False
 
-if __name__ == '__main__':
-    api_key = os.environ.get("SECTION_IO_API_KEY")
-    renew_hibernation(api_key, NODE_ID, DAYS_TO_POSTPONE)
+
+if __name__ == "__main__":
+    api_token = open("sectionio_api_token.txt", "r").read()
+    success = postpone_hibernation(api_token)
+    print("Postpone hibernation succeeded" if success else "Postpone hibernation failed")
