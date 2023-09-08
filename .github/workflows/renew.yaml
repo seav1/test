@@ -1,35 +1,50 @@
-name: Postpone hibernation
+name: Postpone Hibernation
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # 手动触发
 
 jobs:
-  postpone-hibernation:
+  postpone-activity:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: pip install requests
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
 
-      - name: Postpone hibernation
-        run: |
-          import requests
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
 
-          url = "https://api.section.io/v2/accounts/me/hibernation"
-          headers = {"Authorization": "Bearer 7cae1eb0-03ee-4af8-8fc4-2498e8eb73ab:bac2cc44-d0f6-48a6-8f1d-1894edfbafb1"}
+    - name: Postpone Hibernation
+      run: |
+        import requests
+        from datetime import datetime, timedelta
 
-          data = {"postpone_until": "2023-10-01T00:00:00Z"}
+        now = datetime.utcnow()
+        tomorrow = now + timedelta(days=1)
 
-          response = requests.post(url, headers=headers, json=data)
+        url = "https://api.section.io/v1/sites/43009/hibernation/postpone"
 
-          if response.status_code != 200:
-            raise Exception(f"Failed to postpone hibernation: {response.status_code}")
+        data = {
+            "until_date": tomorrow.strftime('%Y-%m-%d')
+        }
 
-          print(f"Hibernation postponed until {response.json()['postpone_until']}")
+        headers = {
+            "Authorization": "Bearer 56d115bc-7e7b-41dc-a72e-7fb77d5dd834:159ea93f-8d9d-459f-bee4-03dec7ddda75"
+        }
+
+        response = requests.post(url, headers=headers, json=data)
+
+        if response.status_code == 200:
+            print("Hibernation postponed successfully")
+        else:
+            print("Failed to postpone hibernation")
 
