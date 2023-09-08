@@ -1,22 +1,68 @@
-name: section
+name: Postpone hibernation
+
 on:
   schedule:
-    - cron: '0 0 1 * *'
-  workflow_dispatch:    
+    - cron: '0 0 * * *'
 
 jobs:
-  renew:
+  postpone-hibernation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: 获取 section.io 项目信息
-        id: get-info
-        run: |
-          echo "::set-output name=project_id::$(curl -s -X GET https://api.section.io/v2/projects | jq -r '.[] | select(.name == env.PROJECT_NAME) | .id')"
-          echo "::set-output name=project_token::$(curl -s -X GET https://api.section.io/v2/projects | jq -r '.[] | select(.name == env.PROJECT_NAME) | .token')"
-      - name: 续期项目
-        uses: sectionio/actions/renew@main
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          project_id: ${{ steps.get-info.outputs.project_id }}
-          project_token: ${{ steps.get-info.outputs.project_token }}
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Postpone hibernation
+        run: |
+          import requests
+
+          url = "https://api.section.io/v2/accounts/me/hibernation"
+          headers = {"Authorization": "Bearer YOUR_API_TOKEN"}
+
+          data = {"postpone_until": "2023-10-01T00:00:00Z"}
+
+          response = requests.post(url, headers=headers, json=data)
+
+          if response.status_code != 200:
+            raise Exception(f"Failed to postpone hibernation: {response.status_code}")
+
+          print(f"Hibernation postponed until {response.json()['postpone_until']}")
+
+name: Postpone hibernation
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  postpone-hibernation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Postpone hibernation
+        run: |
+          import requests
+
+          url = "https://api.section.io/v2/accounts/me/hibernation"
+          headers = {"Authorization": "Bearer 7cae1eb0-03ee-4af8-8fc4-2498e8eb73ab:bac2cc44-d0f6-48a6-8f1d-1894edfbafb1"}
+
+          data = {"postpone_until": "2023-10-01T00:00:00Z"}
+
+          response = requests.post(url, headers=headers, json=data)
+
+          if response.status_code != 200:
+            raise Exception(f"Failed to postpone hibernation: {response.status_code}")
+
+          print(f"Hibernation postponed until {response.json()['postpone_until']}")
 
