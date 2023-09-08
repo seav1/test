@@ -15,7 +15,7 @@ jobs:
 
     - name: Execute postpone hibernation operation
       run: |
-        ENDPOINT="https://1833107456.kube.api.section.io/"
+        ENDPOINT="https://1833107456.kube.api.section.io"
         API_KEY="${{ secrets.SECTION_IO_API_KEY }}"
         
         curl -X POST "$ENDPOINT" \
