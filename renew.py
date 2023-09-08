@@ -1,7 +1,7 @@
 import os
 import requests
 
-API_ENDPOINT = "https://api.section.io/v1.1/hybrid/hibernation/postpone"
+API_ENDPOINT = "https://1833107456.kube.api.section.io"
 
 # 指定需要进行续期操作的节点 ID 和天数
 NODE_ID = 43009
