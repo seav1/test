@@ -1,24 +1,40 @@
-name: Postpone Hibernation
+name: Postpone Hibernation on Section.io
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天0时执行
-  workflow_dispatch:  # 手动启动
-
+    - cron: 0 0 * * *
+  workflow_dispatch:
+  
 jobs:
-  postpone:
+  postpone-hibernation:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout Section.io Repository
+        uses: actions/checkout@v2
+        with:
+          repository: section-io/section.io
+          branch: main
 
-    - name: Execute postpone hibernation operation
-      run: |
-        ENDPOINT="https://1833107456.kube.api.section.io"
-        API_KEY="${{ secrets.SECTION_IO_API_KEY }}"
-        
-        curl -X POST "$ENDPOINT" \
-             -H "Authorization: Bearer $API_KEY" \
-             -H "Content-Type: application/json" \
-             -d '{"action": "postponeHibernation"}'
+      - name: Install Required Dependencies
+        run: |
+          npm install node-fetch
+
+      - name: Postpone Hibernation
+        env:
+          SECTION_IO_TOKEN: ${{ secrets.SECTION_IO_TOKEN }}
+        run: |
+          node -e "require('child_process').execSync('curl -X POST \
+            https://api.section.io/v2/projects/${{ github.event.repository.name }}/actions/hibernation/postpone \
+            -H 'Authorization: Bearer $SECTION_IO_TOKEN' \
+            -H 'Content-Type: application/json' \
+            -d '{\"duration\": 86400}'')"
+
+      - name: Support Manual Start
+        env:
+          SECTION_IO_TOKEN: ${{ secrets.SECTION_IO_TOKEN }}
+        run: |
+          node -e "require('child_process').execSync('curl -X POST \
+            https://api.section.io/v2/projects/${{ github.event.repository.name }}/actions/hibernation/start \
+            -H 'Authorization: Bearer $SECTION_IO_TOKEN' \
+            -H 'Content-Type: application/json' \
+            -d '{}')"
